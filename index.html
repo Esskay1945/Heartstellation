@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heartstellation | Mission Control</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0e27;
+            --accent-pink: #ff69b4;
+            --accent-gold: #FFD700;
+            --text-white: #fff;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        /* --- GLOBAL & ANIMATIONS --- */
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark), #1a1f4a);
+            color: var(--text-white);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .stars-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.5;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0.2;
+                transform: scale(0.8);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        /* --- LAYOUTS --- */
+        .view-section {
+            display: none;
+            /* Controlled by JS */
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .view-section.active {
+            display: flex;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- CARDS & FORMS --- */
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            width: 100%;
+            align-items: start;
+        }
+
+        @media(max-width: 800px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Playfair Display', serif;
+            margin: 0 0 1rem 0;
+        }
+
+        h1 {
+            font-size: 3rem;
+            background: linear-gradient(to right, var(--accent-pink), var(--accent-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: #fff;
+            font-family: inherit;
+        }
+
+        input:focus {
+            border-color: var(--accent-pink);
+            outline: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(45deg, var(--accent-pink), #ff1493);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
+            margin-top: 0.5rem;
+        }
+
+        /* --- DASHBOARD ITEMS --- */
+        .proposal-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background: rgba(255, 215, 0, 0.2);
+            color: var(--accent-gold);
+        }
+
+        .status-yes {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* --- NOTIFICATION POPUP --- */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .popup-content {
+            background: linear-gradient(135deg, #1a1f4a, #2d1b4e);
+            padding: 3rem;
+            border-radius: 30px;
+            text-align: center;
+            border: 2px solid var(--accent-pink);
+            box-shadow: 0 0 50px rgba(255, 105, 180, 0.5);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .popup-title {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .confetti {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- BACKGROUND STARS -->
+    <div class="stars-bg" id="starsBg"></div>
+
+    <!-- VIEW 1: AUTH (LOGIN/REGISTER) -->
+    <div id="authView" class="view-section active">
+        <h1 style="margin-bottom: 3rem;">Heartstellation</h1>
+
+        <!-- LOGIN FORM -->
+        <div id="loginForm" class="glass-card">
+            <h2>Enter the Galaxy 🌌</h2>
+            <input type="text" id="loginUser" placeholder="Username" required>
+            <input type="password" id="loginPass" placeholder="Password" required>
+            <button class="btn" onclick="handleLogin()">Login</button>
+            <button class="btn btn-secondary" onclick="toggleAuth('register')">New User? Create Account</button>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div id="registerForm" class="glass-card" style="display: none;">
+            <h2>Join the Stars ✨</h2>
+            <input type="text" id="regUser" placeholder="Choose Username" required>
+            <input type="password" id="regPass" placeholder="Choose Password" required>
+            <button class="btn" onclick="handleRegister()">Register</button>
+            <button class="btn btn-secondary" onclick="toggleAuth('login')">Back to Login</button>
+        </div>
+    </div>
+
+    <!-- VIEW 2: DASHBOARD -->
+    <div id="dashboardView" class="view-section">
+        <div
+            style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h1>Mission Control 🚀</h1>
+            <button class="btn btn-secondary" style="width: auto; padding: 0.5rem 1.5rem;"
+                onclick="logout()">Logout</button>
+        </div>
+
+        <div class="dashboard-container">
+            <!-- CREATE PROPOSAL -->
+            <div class="glass-card">
+                <h2>New Mission 💌</h2>
+                <form id="createForm" onsubmit="createProposal(event)">
+                    <label>Recipient Name</label>
+                    <input type="text" id="pName" placeholder="e.g. Sarah" required maxlength="15">
+
+                    <label>Secret Message</label>
+                    <textarea id="pMessage" placeholder="Write something sweet..." style="height: 100px; resize: none;"
+                        required></textarea>
+
+                    <label>Background Music (Optional)</label>
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                        <input type="text" id="pMusicUrl" placeholder="Direct MP3 Link...">
+                        <span style="align-self: center; font-size: 0.8rem; color: #aaa;">OR</span>
+                    </div>
+                    <input type="file" id="pMusicFile" accept="audio/*" style="margin-bottom: 2rem;">
+
+                    <button type="submit" class="btn">Launch Proposal 🚀</button>
+                </form>
+            </div>
+
+            <!-- MISSION LOG -->
+            <div class="glass-card">
+                <h2>Mission Log 📡</h2>
+                <div id="proposalsList" style="max-height: 500px; overflow-y: auto;">
+                    <!-- Items injected here -->
+                    <p style="text-align: center; color: #aaa; margin-top: 2rem;">No active missions.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION POPUP -->
+    <div id="notificationPopup" class="popup-overlay">
+        <div class="popup-content">
+            <div class="popup-title">💖 YES! 💖</div>
+            <h3 id="popupText">Sarah said YES!</h3>
+            <p>They have accepted your proposal in the stars.</p>
+            <button class="btn" onclick="closePopup()" style="margin-top: 2rem;">Celebrate! 🎉</button>
+        </div>
+    </div>
+
+    <!-- SOCKET.IO -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // --- STAR BACKGROUND ---
+        const starsBg = document.getElementById('starsBg');
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.width = Math.random() * 3 + 'px';
+            star.style.height = star.style.width;
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 2 + 's';
+            starsBg.appendChild(star);
+        }
+
+        // --- STATE ---
+        let currentUser = null;
+        let socket = io();
+
+        // --- AUTH ---
+        function toggleAuth(mode) {
+            document.getElementById('loginForm').style.display = mode === 'login' ? 'block' : 'none';
+            document.getElementById('registerForm').style.display = mode === 'register' ? 'block' : 'none';
+        }
+
+        async function handleLogin() {
+            const u = document.getElementById('loginUser').value;
+            const p = document.getElementById('loginPass').value;
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: u, password: p })
+            });
+            const data = await res.json();
+            if (data.success) {
+                currentUser = data.username;
+                switchView('dashboardView');
+                loadProposals();
+            } else {
+                alert(data.message);
+            }
+        }
+
+        async function handleRegister() {
+            const u = document.getElementById('regUser').value;
+            const p = document.getElementById('regPass').value;
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: u, password: p })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('Welcome to the galaxy! Please login.');
+                toggleAuth('login');
+            } else {
+                alert(data.message);
+            }
+        }
+
+        function switchView(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        function logout() {
+            currentUser = null;
+            switchView('authView');
+        }
+
+        // --- DASHBOARD ---
+        async function createProposal(e) {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('username', currentUser);
+            formData.append('name', document.getElementById('pName').value);
+            formData.append('message', document.getElementById('pMessage').value);
+            formData.append('musicUrl', document.getElementById('pMusicUrl').value);
+
+            const fileInput = document.getElementById('pMusicFile');
+            if (fileInput.files[0]) {
+                formData.append('bgmFile', fileInput.files[0]);
+            }
+
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = 'Transmitting... 📡';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/proposals/create', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('createForm').reset();
+                    loadProposals();
+                }
+            } catch (err) {
+                alert('Transmission failed. Check connection.');
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function loadProposals() {
+            const res = await fetch(`/api/proposals?username=${currentUser}`);
+            const proposals = await res.json();
+            const list = document.getElementById('proposalsList');
+            list.innerHTML = '';
+
+            if (proposals.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #aaa; margin-top: 2rem;">No active missions.</p>';
+                return;
+            }
+
+            proposals.forEach(p => {
+                // Join socket room for this proposal to get real-time updates
+                socket.emit('join_proposal', p.id);
+
+                const div = document.createElement('div');
+                div.className = 'proposal-item';
+
+                let statusBadge = `<span class="status-badge status-pending">Pending... 🔭</span>`;
+                if (p.response === 'yes') {
+                    statusBadge = `<span class="status-badge status-yes">SAID YES! 💖</span>`;
+                }
+
+                // Generate Link
+                const link = `${window.location.origin}/forever.html?id=${p.id}&name=${p.name}&msg=${btoa(unescape(encodeURIComponent(p.message)))}&music=${encodeURIComponent(p.musicUrl)}`;
+
+                div.innerHTML = `
+                    <div>
+                        <h3>${p.name}</h3>
+                        <div style="font-size: 0.8rem; color: #aaa;">${new Date(p.timestamp).toLocaleDateString()}</div>
+                        <div style="margin-top: 0.5rem;">
+                            <input type="text" readonly value="${link}" style="font-size: 0.8rem; padding: 0.5rem; width: 200px; display: inline-block; margin:0;" onclick="this.select(); document.execCommand('copy'); alert('Link Copied!')">
+                        </div>
+                    </div>
+                    <div>${statusBadge}</div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        // --- REAL-TIME ALERTS ---
+        socket.on('response_received', (data) => {
+            if (data.response === 'yes') {
+                document.getElementById('popupText').innerText = `Proposal Accepted!`; // Generic message, or could store name map
+                document.getElementById('notificationPopup').style.display = 'flex';
+
+                // Refresh list to show "YES" status
+                loadProposals();
+            }
+        });
+
+        function closePopup() {
+            document.getElementById('notificationPopup').style.display = 'none';
+        }
+
+    </script>
+</body>
+
+</html>
+});
+const data = await res.json();
+
+if (data.success) {
+console.log('Upload successful:', data.url);
+uploadedMusicUrl = data.url; // Save the server URL
+return true;
+} else {
+console.error('Upload failed:', data.message);
+showToast('⚠️ Upload failed: ' + data.message, 'warning');
+return false;
+}
+} catch (e) {
+console.error('Upload error:', e);
+showToast('⚠️ Server error during upload.', 'warning');
+return false;
+}
+}
+
+function getProposals() {
+const proposals = localStorage.getItem('hearstellation_proposals');
+return proposals ? JSON.parse(proposals) : [];
+}
+
+function saveProposal(proposal) {
+const proposals = getProposals();
+proposals.unshift(proposal);
+localStorage.setItem('hearstellation_proposals', JSON.stringify(proposals));
+}
+
+function updateProposalStatus(id, status) {
+const proposals = getProposals();
+const proposal = proposals.find(p => p.id === id);
+if (proposal) {
+proposal.status = status;
+proposal.answeredAt = new Date().toISOString();
+localStorage.setItem('hearstellation_proposals', JSON.stringify(proposals));
+}
+}
+
+function generateId() {
+return 'hs_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+}
+
+function showToast(message, type = 'success') {
+toast.textContent = message;
+toast.className = 'toast visible' + (type === 'yes' ? ' yes-toast' : '');
+setTimeout(() => {
+toast.className = 'toast';
+}, 3000);
+}
+
+function formatDate(dateString) {
+const date = new Date(dateString);
+return date.toLocaleDateString('en-US', {
+month: 'short',
+day: 'numeric',
+hour: '2-digit',
+minute: '2-digit'
+});
+}
+
+function renderProposals() {
+const proposals = getProposals();
+
+if (proposals.length === 0) {
+emptyState.style.display = 'block';
+return;
+}
+
+emptyState.style.display = 'none';
+
+// Clear and rebuild list
+const items = proposalsList.querySelectorAll('.proposal-item');
+items.forEach(item => item.remove());
+
+proposals.forEach(proposal => {
+const item = document.createElement('div');
+item.className = 'proposal-item';
+
+const statusClass = proposal.status === 'yes' ? 'status-yes' : 'status-pending';
+const statusText = proposal.status === 'yes' ? '💕 Said YES!' : '⏳ Waiting...';
+
+item.innerHTML = `
+<div class="proposal-info">
+    <div class="proposal-avatar">💝</div>
+    <div>
+        <div class="proposal-name">${proposal.name}</div>
+        <div class="proposal-date">${formatDate(proposal.createdAt)}</div>
+    </div>
+</div>
+<div class="proposal-status ${statusClass}">${statusText}</div>
+`;
+
+proposalsList.appendChild(item);
+});
+}
+
+// File upload handling
+bgmFile.addEventListener('change', (e) => {
+const file = e.target.files[0];
+if (file) {
+// Check file size (localStorage limit ~5MB)
+if (file.size > 3 * 1024 * 1024) {
+showToast('⚠️ File too large! Max 3MB for audio to ensure it fits.', 'warning');
+bgmFile.value = '';
+return;
+}
+fileName.textContent = '🎵 ' + file.name;
+fileUpload.classList.add('has-file');
+} else {
+fileName.textContent = '';
+fileUpload.classList.remove('has-file');
+}
+});
+
+// Form submission
+form.addEventListener('submit', async (e) => {
+e.preventDefault();
+
+const name = nameInput.value.trim().toUpperCase();
+if (!name) return;
+
+const id = generateId();
+const file = bgmFile.files[0];
+const musicUrl = bgmUrl.value.trim();
+
+// Save BGM if provided (Upload to Server)
+if (file) {
+const success = await uploadBGM(file);
+if (!success) return; // Stop if upload fails
+}
+
+// Use uploaded URL if available, otherwise input URL
+const finalMusicUrl = uploadedMusicUrl || musicUrl;
+
+// Create proposal
+const proposal = {
+id,
+name,
+hasBGM: !!finalMusicUrl, // Just a flag
+musicUrl: finalMusicUrl || null,
+status: 'pending',
+createdAt: new Date().toISOString()
+};
+
+saveProposal(proposal);
+
+// Generate link
+const baseUrl = new URL('forever.html', window.location.href).href.split('?')[0];
+let link = `${baseUrl}?id=${id}&name=${encodeURIComponent(name)}`;
+
+const message = messageInput.value.trim();
+if (message) {
+// Base64 encode for link safety and basic obscuring
+const encodedMsg = btoa(unescape(encodeURIComponent(message)));
+link += `&msg=${encodedMsg}`;
+}
+
+if (finalMusicUrl) {
+link += `&music=${encodeURIComponent(finalMusicUrl)}`;
+}
+
+const webhookUrl = webhookUrlInput.value.trim();
+if (webhookUrl) {
+link += `&notify=${encodeURIComponent(webhookUrl)}`;
+localStorage.setItem('hearstellation_last_webhook', webhookUrl); // Remember for next time
+}
+
+proposalLink.value = link;
+linkSection.classList.add('visible');
+
+renderProposals();
+showToast('✨ Proposal created! Share the link with your loved one.');
+});
+
+// Copy link
+copyBtn.addEventListener('click', () => {
+proposalLink.select();
+document.execCommand('copy');
+copyBtn.textContent = '✓ Copied!';
+copyBtn.classList.add('copied');
+setTimeout(() => {
+copyBtn.textContent = 'Copy';
+copyBtn.classList.remove('copied');
+}, 2000);
+});
+
+// Preview
+previewBtn.addEventListener('click', () => {
+window.open(proposalLink.value, '_blank');
+});
+
+// Listen for YES responses (cross-tab communication)
+window.addEventListener('storage', (e) => {
+if (e.key && e.key.startsWith('hearstellation_yes_')) {
+const id = e.key.replace('hearstellation_yes_', '');
+const proposals = getProposals();
+const proposal = proposals.find(p => p.id === id);
+
+if (proposal && proposal.status !== 'yes') {
+updateProposalStatus(id, 'yes');
+renderProposals();
+showToast(`🎉 ${proposal.name} SAID YES!!! 💕`, 'yes');
+}
+}
+});
+
+// Poll for YES responses (backup for same-origin)
+function checkForResponses() {
+// Poll Server for updates
+fetch('/api/proposals')
+.then(res => res.json())
+.then(serverProposals => {
+const localProposals = getProposals();
+let changed = false;
+
+serverProposals.forEach(serverProp => {
+const local = localProposals.find(p => p.id === serverProp.id);
+if (local && (local.status !== serverProp.response)) {
+local.status = serverProp.response;
+local.answeredAt = serverProp.timestamp;
+changed = true;
+
+if (local.status === 'yes') {
+showToast(`💖 ${local.name} Said YES!`, 'yes');
+// Play celebration sound if desired
+}
+}
+});
+
+if (changed) {
+localStorage.setItem('hearstellation_proposals', JSON.stringify(localProposals));
+renderProposals();
+}
+})
+.catch(e => console.error('Polling error:', e));
+}
+
+// Initialize
+function init() {
+// Restore last webhook
+const lastWebhook = localStorage.getItem('hearstellation_last_webhook');
+if (lastWebhook) webhookUrlInput.value = lastWebhook;
+
+renderProposals();
+
+// Check for responses every 5 seconds
+setInterval(checkForResponses, 5000);
+
+// Initial check
+checkForResponses();
+}
+
+init();
+</script>
+</body>
+
+</html>

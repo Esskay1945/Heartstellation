@@ -1,0 +1,915 @@
+/* ========================================
+   HEARTSTELLATION - Proposal Platform 
+   "Where love becomes visible"
+   ======================================== */
+
+/* Design Tokens */
+:root {
+    /* Deep Space Colors */
+    --bg-navy: #0a0e27;
+    --midnight-blue: #1a1f4a;
+    --deep-purple: #2d1b4e;
+
+    /* Love Colors */
+    --bee-gold: #FFD700;
+    --honey-gold: #FFA500;
+    --rose-pink: #ff69b4;
+    --lavender: #e6ccff;
+    --rose-gold: #B76E79;
+    --star-white: #ffffff;
+    --heart-red: #ff1744;
+
+    /* Typography */
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-script: 'Great Vibes', cursive;
+    --font-body: 'Poppins', -apple-system, sans-serif;
+
+    /* Glows */
+    --glow-white: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 215, 0, 0.4);
+    --glow-pink: 0 0 30px rgba(255, 105, 180, 0.9), 0 0 60px rgba(230, 204, 255, 0.5);
+    --glow-gold: 0 0 25px rgba(255, 215, 0, 0.8), 0 0 50px rgba(255, 165, 0, 0.4);
+    --glow-epic: 0 0 40px rgba(255, 105, 180, 1), 0 0 80px rgba(255, 215, 0, 0.6), 0 0 120px rgba(230, 204, 255, 0.3);
+    --glow-heart: 0 0 50px rgba(255, 23, 68, 0.8), 0 0 100px rgba(255, 105, 180, 0.5);
+}
+
+/* Reset & Base */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg-navy);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Main Canvas */
+#starCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    cursor: default;
+}
+
+/* UI Overlay */
+#uiOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+/* Opening Text */
+#openingText {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+#openingText.visible {
+    opacity: 1;
+}
+
+.opening-line {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 5vw, 3rem);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--star-white);
+    text-shadow: var(--glow-white);
+    letter-spacing: 0.1em;
+}
+
+/* Instruction Text */
+#instructionText {
+    position: absolute;
+    top: 12%;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+}
+
+#instructionText.visible {
+    opacity: 1;
+}
+
+.instruction-main {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight: 600;
+    color: var(--star-white);
+    text-shadow: var(--glow-white);
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+}
+
+.instruction-sub {
+    font-family: var(--font-script);
+    font-size: clamp(1.2rem, 3vw, 2rem);
+    color: var(--rose-pink);
+    text-shadow: var(--glow-pink);
+}
+
+/* Click Hint */
+#clickHint {
+    position: absolute;
+    top: 25%;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    animation: bounceHint 1.5s ease-in-out infinite;
+}
+
+#clickHint.visible {
+    opacity: 1;
+}
+
+.hint-arrow {
+    font-size: 3rem;
+    animation: pointDown 1s ease-in-out infinite;
+}
+
+.hint-text {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--bee-gold);
+    text-shadow: var(--glow-gold);
+    margin-top: 0.5rem;
+}
+
+@keyframes bounceHint {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes pointDown {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(10px);
+    }
+}
+
+/* Name Display */
+#nameDisplay {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: clamp(1rem, 4vw, 3rem);
+    font-family: var(--font-display);
+    font-size: clamp(5rem, 18vw, 12rem);
+    font-weight: 900;
+    color: var(--star-white);
+    text-shadow: var(--glow-epic);
+}
+
+.letter {
+    opacity: 0;
+    transform: scale(0.3) translateY(50px);
+    animation: letterRevealEpic 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    text-shadow:
+        0 0 20px var(--rose-pink),
+        0 0 40px var(--rose-pink),
+        0 0 60px var(--bee-gold),
+        0 0 80px var(--bee-gold);
+}
+
+/* Heart Icon (replaces ring) */
+#heartIcon {
+    position: absolute;
+    top: calc(50% - 10rem);
+    font-size: clamp(4rem, 12vw, 8rem);
+    opacity: 0;
+    transform: scale(0);
+    filter: drop-shadow(0 0 30px var(--heart-red)) drop-shadow(0 0 60px var(--rose-pink));
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#heartIcon.visible {
+    opacity: 1;
+    transform: scale(1);
+    animation: heartBeat 1s ease-in-out infinite;
+}
+
+@keyframes heartBeat {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    15% {
+        transform: scale(1.15);
+    }
+
+    30% {
+        transform: scale(1);
+    }
+
+    45% {
+        transform: scale(1.1);
+    }
+
+    60% {
+        transform: scale(1);
+    }
+}
+
+/* Progress Indicator */
+#progressIndicator {
+    position: absolute;
+    top: calc(50% + 12rem);
+    display: flex;
+    gap: 0.75rem;
+}
+
+.progress-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.progress-dot.filled {
+    background: var(--rose-pink);
+    border-color: var(--rose-pink);
+    box-shadow: 0 0 15px var(--rose-pink), 0 0 30px var(--rose-pink);
+    transform: scale(1.2);
+}
+
+/* Proposal Section */
+#proposalSection {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+}
+
+#proposalSection.visible {
+    opacity: 1;
+}
+
+/* Big Heart (replaces ring) */
+#bigHeart {
+    font-size: clamp(6rem, 18vw, 12rem);
+    margin-bottom: 1rem;
+    opacity: 0;
+    transform: scale(0) rotate(-20deg);
+    filter: drop-shadow(0 0 50px var(--heart-red)) drop-shadow(0 0 100px var(--rose-pink));
+}
+
+#bigHeart.animate {
+    animation: heartEntryEpic 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+        heartPulse 1.5s ease-in-out 1.5s infinite;
+}
+
+@keyframes heartEntryEpic {
+    0% {
+        opacity: 0;
+        transform: scale(0) rotate(-20deg);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.3) rotate(10deg);
+    }
+
+    70% {
+        transform: scale(0.9) rotate(-5deg);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+@keyframes heartPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 50px var(--heart-red)) drop-shadow(0 0 100px var(--rose-pink));
+    }
+
+    50% {
+        transform: scale(1.1);
+        filter: drop-shadow(0 0 70px var(--heart-red)) drop-shadow(0 0 120px var(--rose-pink));
+    }
+}
+
+#proposalText {
+    font-family: var(--font-display);
+    line-height: 1.2;
+}
+
+#willYouText {
+    font-size: clamp(1.2rem, 4vw, 2rem);
+    font-weight: 400;
+    color: var(--lavender);
+    text-shadow: 0 0 15px var(--lavender);
+    margin-bottom: 1rem;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+#willYouText.animate {
+    animation: textReveal 0.6s ease-out forwards;
+}
+
+#proposalLine1,
+#proposalLine2,
+#proposalLine3 {
+    opacity: 0;
+    transform: scale(0.5) translateY(30px);
+}
+
+#proposalLine1 {
+    font-size: clamp(3rem, 12vw, 8rem);
+    font-weight: 900;
+    color: var(--rose-pink);
+    text-shadow: var(--glow-pink);
+}
+
+#proposalLine2 {
+    font-size: clamp(3rem, 12vw, 8rem);
+    font-weight: 900;
+    color: var(--bee-gold);
+    text-shadow: var(--glow-gold);
+}
+
+#proposalLine3 {
+    font-size: clamp(3.5rem, 14vw, 9rem);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--star-white), var(--rose-pink), var(--bee-gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 30px var(--rose-pink)) drop-shadow(0 0 60px var(--bee-gold));
+}
+
+#proposalLine1.animate,
+#proposalLine2.animate,
+#proposalLine3.animate {
+    animation: proposalWordReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Celebration Text */
+#celebrationText {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+}
+
+#celebrationText.visible {
+    opacity: 1;
+}
+
+.celebration-main {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 12vw, 8rem);
+    font-weight: 900;
+    color: var(--star-white);
+    text-shadow: var(--glow-epic);
+    margin-bottom: 1rem;
+    animation: celebratePulse 0.5s ease-in-out infinite alternate;
+}
+
+.celebration-sub {
+    font-family: var(--font-script);
+    font-size: clamp(1.5rem, 5vw, 3rem);
+    color: var(--bee-gold);
+    text-shadow: var(--glow-gold);
+    margin-bottom: 2rem;
+}
+
+.celebration-poem {
+    font-family: var(--font-display);
+    font-size: clamp(1rem, 3vw, 1.5rem);
+    font-style: italic;
+    color: var(--lavender);
+    text-shadow: 0 0 10px var(--lavender);
+    line-height: 1.8;
+}
+
+.celebration-poem .highlight {
+    font-size: clamp(1.2rem, 4vw, 2rem);
+    font-weight: 700;
+    font-style: normal;
+    color: var(--rose-pink);
+    text-shadow: var(--glow-pink);
+}
+
+/* Action Buttons */
+#actionButtons,
+#watchAgainWrapper {
+    position: absolute;
+    bottom: 8%;
+    display: flex;
+    gap: 2rem;
+    pointer-events: auto;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#actionButtons.visible,
+#watchAgainWrapper.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#yesButton,
+#noButton,
+#restartButton {
+    padding: 1.2rem 2.5rem;
+    font-family: var(--font-display);
+    font-size: clamp(1rem, 3vw, 1.4rem);
+    font-weight: 700;
+    border: none;
+    border-radius: 60px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+#yesButton {
+    background: linear-gradient(135deg, var(--rose-pink), #ff1493, var(--heart-red));
+    color: white;
+    box-shadow: 0 8px 30px rgba(255, 105, 180, 0.6), 0 0 60px rgba(255, 105, 180, 0.3);
+    animation: yesButtonPulse 1.5s ease-in-out infinite;
+}
+
+#yesButton:hover {
+    transform: scale(1.15) translateY(-5px);
+    box-shadow: 0 12px 40px rgba(255, 105, 180, 0.8), 0 0 80px rgba(255, 105, 180, 0.5);
+}
+
+#noButton {
+    background: rgba(100, 100, 100, 0.3);
+    color: rgba(255, 255, 255, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+#noButton:hover {
+    background: rgba(80, 80, 80, 0.4);
+    transform: scale(0.95);
+}
+
+#restartButton {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--star-white);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
+}
+
+#restartButton:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: var(--star-white);
+    transform: scale(1.08);
+    box-shadow: var(--glow-white);
+}
+
+/* Screen Flash */
+#screenFlash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+    background: white;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.1s ease;
+}
+
+#screenFlash.flash {
+    animation: screenFlashAnim 0.3s ease-out;
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+/* Keyframe Animations */
+@keyframes letterRevealEpic {
+    0% {
+        opacity: 0;
+        transform: scale(0.3) translateY(50px);
+    }
+
+    60% {
+        transform: scale(1.2) translateY(-10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes textReveal {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes proposalWordReveal {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) translateY(30px);
+    }
+
+    60% {
+        transform: scale(1.1) translateY(-5px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes celebratePulse {
+    0% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(1.05);
+    }
+}
+
+@keyframes yesButtonPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 8px 30px rgba(255, 105, 180, 0.6), 0 0 60px rgba(255, 105, 180, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 8px 40px rgba(255, 105, 180, 0.8), 0 0 80px rgba(255, 105, 180, 0.5);
+    }
+}
+
+/* BGM Interaction Overlay */
+#letterOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: opacity 0.8s ease, visibility 0.8s;
+    /* Re-added transition from original */
+}
+
+#letterOverlay.hidden {
+    /* Re-added from original */
+    opacity: 0;
+    visibility: hidden;
+}
+
+.envelope {
+    width: 300px;
+    height: 200px;
+    background: white;
+    border-radius: 5px;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    animation: wiggle 2s infinite ease-in-out;
+    display: flex;
+    /* Re-added from original */
+    align-items: center;
+    /* Re-added from original */
+    justify-content: center;
+    /* Re-added from original */
+}
+
+.envelope::before {
+    /* Re-added from original */
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border: 3px solid var(--rose-pink);
+    margin: 8px;
+    border-radius: 4px;
+}
+
+.heart-seal {
+    color: var(--rose-pink);
+    filter: drop-shadow(0 4px 8px rgba(255, 23, 68, 0.3));
+    z-index: 2;
+    animation: heartBeat 1.5s infinite ease-in-out;
+}
+
+.open-text {
+    position: absolute;
+    bottom: -80px;
+    width: 100%;
+    color: var(--star-white);
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-align: center;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    letter-spacing: 1px;
+}
+
+@keyframes wiggle {
+
+    0%,
+    100% {
+        transform: rotate(-3deg);
+    }
+
+    50% {
+        transform: rotate(3deg);
+    }
+}
+
+@keyframes heartBeat {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.15);
+    }
+}
+
+/* ============ LOADING & ERRORS ============ */
+#loadingOverlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-navy);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    transition: opacity 0.5s ease;
+}
+
+.loader {
+    width: 60px;
+    height: 60px;
+    border: 5px solid rgba(255, 255, 255, 0.1);
+    border-top: 5px solid var(--rose-pink);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+.magical-error-container {
+    padding: 2rem;
+    background: rgba(255, 23, 68, 0.1);
+    border: 1px solid var(--heart-red);
+    border-radius: 12px;
+    text-align: center;
+    max-width: 80%;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #instructionText {
+        top: 8%;
+    }
+
+    .instruction-main {
+        font-size: 1.8rem;
+    }
+
+    #clickHint {
+        top: 20%;
+    }
+
+    #nameDisplay {
+        font-size: clamp(3rem, 15vw, 6rem);
+        gap: 1rem;
+    }
+
+    #heartIcon {
+        top: calc(50% - 6rem);
+        font-size: 5rem;
+    }
+
+    #progressIndicator {
+        top: calc(50% + 7rem);
+    }
+
+    #bigHeart {
+        font-size: 6rem;
+    }
+
+    #proposalLine1 {
+        font-size: 3rem;
+    }
+
+    #proposalLine2 {
+        font-size: 3rem;
+    }
+
+    #proposalLine3 {
+        font-size: 3.5rem;
+    }
+
+    #actionButtons {
+        flex-direction: row;
+        /* Keep buttons side by side if possible */
+        gap: 1rem;
+        bottom: 10%;
+    }
+
+    #yesButton,
+    #noButton,
+    #restartButton {
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    .celebration-poem {
+        padding: 0 1.5rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-height: 700px) {
+    #nameDisplay {
+        font-size: clamp(4rem, 15vw, 8rem);
+    }
+
+    #bigHeart {
+        font-size: clamp(4rem, 12vw, 8rem);
+    }
+
+    #proposalLine1,
+    #proposalLine2 {
+        font-size: clamp(2.5rem, 10vw, 6rem);
+    }
+
+    #proposalLine3 {
+        font-size: clamp(3rem, 12vw, 7rem);
+    }
+}
+
+/* High DPI screens */
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+    #starCanvas {
+        image-rendering: -webkit-optimize-contrast;
+    }
+}
+
+/* --- NOTEBOOK MESSAGE --- */
+#notebookContainer {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 1100;
+    backdrop-filter: blur(10px);
+    transition: all 0.5s ease;
+}
+
+#notebookContainer.visible {
+    display: flex;
+    animation: fadeIn 0.5s ease;
+}
+
+.notebook-content {
+    width: 90%;
+    max-width: 500px;
+    background: #fff;
+    padding: 2rem 3rem;
+    border-radius: 4px;
+    box-shadow: 20px 20px 0 rgba(0, 0, 0, 0.2);
+    position: relative;
+    background-image: linear-gradient(#e1e1e1 1px, transparent 1px);
+    background-size: 100% 30px;
+    line-height: 30px;
+    text-align: left;
+    transform: scale(0.9);
+    opacity: 0;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#notebookContainer.visible .notebook-content {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.notebook-content::before {
+    content: '';
+    position: absolute;
+    left: 40px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #ff80b3;
+    /* Notebook margin line */
+}
+
+.notebook-content p {
+    margin: 10px 0;
+    padding-left: 10px;
+    font-size: 1.4rem;
+    color: #444;
+    font-family: 'Great Vibes', cursive;
+    /* Handwriting font */
+    min-height: 150px;
+    word-break: break-word;
+    line-height: 30px;
+}
+
+.notebook-btn {
+    margin-top: 2rem;
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background: #ff80b3;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.notebook-btn:hover {
+    background: #ff4d88;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 128, 179, 0.4);
+}

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>✨ A Message Written in the Stars 💕</title>
+    <meta name="description" content="Someone special has a message for you, written in the stars...">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Great+Vibes&family=Poppins:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <div class="loader"></div>
+        <div style="color: white; font-family: 'Poppins', sans-serif;">Aligning the stars...</div>
+    </div>
+
+    <!-- BGM Interaction Overlay -->
+    <div id="letterOverlay">
+        <div class="envelope">
+            <div class="heart-seal">❤️</div>
+            <div class="open-text">You have a secret message from the stars...<br>Click to reveal ✨</div>
+        </div>
+    </div>
+
+    <!-- Notebook Message View -->
+    <div id="notebookContainer" style="display: none;">
+        <div class="notebook-content">
+            <p id="messageBody"></p>
+            <button id="notebookContinue" class="notebook-btn">Continue to the stars... ✨</button>
+        </div>
+    </div>
+
+    <!-- Main Canvas -->
+    <canvas id="starCanvas"></canvas>
+
+    <!-- UI Overlay -->
+    <div id="uiOverlay">
+        <!-- Opening Text -->
+        <div id="openingText" class="hidden">
+            <div class="opening-line">The universe has a secret...</div>
+        </div>
+
+        <!-- Instruction Text -->
+        <div id="instructionText" class="hidden">
+            <div class="instruction-main">Click the glowing stars...</div>
+            <div class="instruction-sub">Spell their name...</div>
+        </div>
+
+        <!-- Star Click Hint -->
+        <div id="clickHint" class="hidden">
+            <div class="hint-arrow">👆</div>
+            <div class="hint-text">Click the bright stars!</div>
+        </div>
+
+        <!-- Name Display -->
+        <div id="nameDisplay"></div>
+
+        <!-- Progress Indicator -->
+        <div id="progressIndicator"></div>
+
+        <!-- Big Heart Icon (shown after name complete) -->
+        <div id="heartIcon" class="hidden">❤️</div>
+
+        <!-- Proposal Section -->
+        <div id="proposalSection" class="hidden">
+            <div id="bigHeart">❤️</div>
+            <div id="proposalText">
+                <div id="willYouText">WILL YOU...</div>
+                <div id="proposalLine1">BE</div>
+                <div id="proposalLine2">MINE</div>
+                <div id="proposalLine3">FOREVER?</div>
+            </div>
+        </div>
+
+        <!-- Celebration Text -->
+        <div id="celebrationText" class="hidden">
+            <div class="celebration-main">💕 YES! 💕</div>
+            <div class="celebration-sub">Forever starts now ✨</div>
+            <div class="celebration-poem">
+                The stars aligned<br>
+                The heart formed<br>
+                And you said yes<br><br>
+                <span class="highlight">This is just the beginning...</span>
+            </div>
+        </div>
+
+        <!-- Action Buttons (YES/NO during proposal) -->
+        <div id="actionButtons" class="hidden">
+            <button id="yesButton">💕 YES!</button>
+            <button id="noButton">😢 No</button>
+        </div>
+
+        <!-- Watch Again Button (shown after celebration) -->
+        <div id="watchAgainWrapper" class="hidden">
+            <button id="restartButton">🌌 Watch Again</button>
+        </div>
+    </div>
+
+    <!-- Screen Flash -->
+    <div id="screenFlash"></div>
+
+    <!-- Hidden audio for custom BGM -->
+    <audio id="customBGM" loop></audio>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
